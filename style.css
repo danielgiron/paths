@@ -1,0 +1,29 @@
+body {
+  min-width: 700px;
+}
+.cells__container {
+  position: relative;
+  margin: 0 auto;
+  background-color: rgb(197, 197, 197);
+  box-sizing: content-box;
+  border: 0px solid black;
+  height: fit-content;
+  width: fit-content;
+  padding: 5px;
+  line-height: 1px;
+}
+
+.cell {
+  position: relative;
+  display: inline-block;
+  border: 0px solid gray;
+  background-color: rgb(255, 255, 255);
+  width: 7px;
+  height: 7px;
+  box-sizing: border-box;
+  margin: 1px;
+}
+
+.highlight {
+  background-color: #2d314d;
+}
