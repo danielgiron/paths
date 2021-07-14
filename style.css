@@ -10,7 +10,7 @@ body {
   height: fit-content;
   width: fit-content;
   padding: 5px;
-  line-height: 1px;
+  line-height: 0px;
 }
 
 .cell {
@@ -25,5 +25,5 @@ body {
 }
 
 .highlight {
-  background-color: #2d314d;
+  background-color: #2d314e;
 }
