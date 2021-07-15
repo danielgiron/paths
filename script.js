@@ -1,30 +1,15 @@
 let cellsContainer = document.querySelector(".cells__container");
 
-let letters = ["a", "b", "c", "d", "e", "f", "g", "h"];
-let alpha = 0; //index variable of letters[]
-let numbers = ["1", "2", "3", "4", "5", "6", "7", "8"];
-let num = 0; //index variable of numbers[]
-
-let cellFlip = true; //used to create alternating cells classed as "even" or not
-for (let i = 0; i < 80; i++) {
-  for (let n = 0; n < 80; n++) {
+for (let y = 0; y < 80; y++) {
+  for (let x = 0; x < 80; x++) {
     let newBlock = document.createElement("div");
     newBlock.classList.add("cell");
-    if (cellFlip) {
-      newBlock.classList.add("even");
-    }
-    cellFlip = !cellFlip;
-    cellId = "" + letters[alpha] + numbers[num];
+    cellId = "x" + x + "y" + y;
     newBlock.id = cellId;
     cellsContainer.appendChild(newBlock);
-
-    num = num + 1;
   }
   const br = document.createElement("br");
   cellsContainer.appendChild(br);
-  cellFlip = !cellFlip;
-  num = 0;
-  alpha = alpha + 1;
 }
 
 cellsContainer.addEventListener("mouseover", hoverOn);
@@ -42,14 +27,17 @@ cellsContainer.addEventListener("mouseover", hoverOn);
 //   // }, 2000);
 // }
 
+let highlightColor = "#2d314e";
 let colorStops = 2;
-let colorArray = generateColor("#ffffff", "#2d314e", colorStops);
-const FADE = false;
+let colorArray = generateColor("#ffffff", highlightColor, colorStops);
+const FADE = true;
 
 function hoverOn(event) {
   if (event.target.classList.contains("cell")) {
     let cell = event.target;
-    cell.classList.add("highlight");
+    //cell.classList.add("highlight");
+    cell.style.backgroundColor = highlightColor;
+    console.log(cell.id);
 
     if (FADE) {
       let i = 0;
@@ -60,7 +48,7 @@ function hoverOn(event) {
           if (i < colorStops) {
             loop();
           } else {
-            cell.classList.remove("highlight");
+            //cell.classList.remove("highlight");
           }
         }, 500);
       }
@@ -70,64 +58,104 @@ function hoverOn(event) {
   }
 }
 
-//color adjusting functinon from stackoverflow user Euler Junior:
-//https://stackoverflow.com/questions/3080421/javascript-color-gradient
-function hex(c) {
-  var s = "0123456789abcdef";
-  var i = parseInt(c);
-  if (i == 0 || isNaN(c)) return "00";
-  i = Math.round(Math.min(Math.max(0, i), 255));
-  return s.charAt((i - (i % 16)) / 16) + s.charAt(i % 16);
-}
+function movingDot() {
+  let startingX = 39;
+  let startingY = 39;
+  let redCell = document.getElementById("x" + startingX + "y" + startingY);
+  redCell.style.backgroundColor = "red";
 
-/* Convert an RGB triplet to a hex string */
-function convertToHex(rgb) {
-  return hex(rgb[0]) + hex(rgb[1]) + hex(rgb[2]);
-}
+  let direction = Math.floor(Math.random() * 5);
+  let c = 0;
 
-/* Remove '#' in color hex string */
-function trim(s) {
-  return s.charAt(0) == "#" ? s.substring(1, 7) : s;
-}
+  function redLoop() {
+    setTimeout(function (direction) {
+      direction = Math.floor(Math.random() * 5);
+      redCell.style.backgroundColor = "#ffffff";
+      if (direction === 0) {
+        startingX++;
+      }
+      if (direction === 1) {
+        startingY++;
+      }
+      if (direction === 2) {
+        startingX--;
+      }
+      if (direction === 3) {
+        startingY--;
+      }
 
-/* Convert a hex string to an RGB triplet */
-function convertToRGB(hex) {
-  var color = [];
-  color[0] = parseInt(trim(hex).substring(0, 2), 16);
-  color[1] = parseInt(trim(hex).substring(2, 4), 16);
-  color[2] = parseInt(trim(hex).substring(4, 6), 16);
-  return color;
-}
+      redCell = document.getElementById("x" + startingX + "y" + startingY);
+      redCell.style.backgroundColor = "red";
+      c++;
 
-function generateColor(colorStart, colorEnd, colorCount) {
-  // The beginning of your gradient
-  var start = convertToRGB(colorStart);
-
-  // The end of your gradient
-  var end = convertToRGB(colorEnd);
-
-  // The number of colors to compute
-  var len = colorCount;
-
-  //Alpha blending amount
-  var alpha = 0.0;
-
-  var saida = [];
-
-  for (i = 0; i < len; i++) {
-    var c = [];
-    alpha += 1.0 / len;
-
-    c[0] = start[0] * alpha + (1 - alpha) * end[0];
-    c[1] = start[1] * alpha + (1 - alpha) * end[1];
-    c[2] = start[2] * alpha + (1 - alpha) * end[2];
-
-    saida.push(convertToHex(c));
+      if (startingX > 0 && startingX < 79 && startingY > 0 && startingY < 79) {
+        redLoop();
+      }
+    }, 0);
   }
 
-  return saida;
+  redLoop();
+  console.log(c);
 }
-/////////////////////////end of code by Euler Junior on Stackoverflow
+
+movingDot();
+
+//////////////////////////////////////////////////////////////////////////
+//color adjusting functinon from stackoverflow user Euler Junior:
+//https://stackoverflow.com/questions/3080421/javascript-color-gradient
+{
+  function hex(c) {
+    var s = "0123456789abcdef";
+    var i = parseInt(c);
+    if (i == 0 || isNaN(c)) return "00";
+    i = Math.round(Math.min(Math.max(0, i), 255));
+    return s.charAt((i - (i % 16)) / 16) + s.charAt(i % 16);
+  }
+  /* Convert an RGB triplet to a hex string */
+  function convertToHex(rgb) {
+    return hex(rgb[0]) + hex(rgb[1]) + hex(rgb[2]);
+  }
+  /* Remove '#' in color hex string */
+  function trim(s) {
+    return s.charAt(0) == "#" ? s.substring(1, 7) : s;
+  }
+  /* Convert a hex string to an RGB triplet */
+  function convertToRGB(hex) {
+    var color = [];
+    color[0] = parseInt(trim(hex).substring(0, 2), 16);
+    color[1] = parseInt(trim(hex).substring(2, 4), 16);
+    color[2] = parseInt(trim(hex).substring(4, 6), 16);
+    return color;
+  }
+  function generateColor(colorStart, colorEnd, colorCount) {
+    // The beginning of your gradient
+    var start = convertToRGB(colorStart);
+
+    // The end of your gradient
+    var end = convertToRGB(colorEnd);
+
+    // The number of colors to compute
+    var len = colorCount;
+
+    //Alpha blending amount
+    var alpha = 0.0;
+
+    var saida = [];
+
+    for (i = 0; i < len; i++) {
+      var c = [];
+      alpha += 1.0 / len;
+
+      c[0] = start[0] * alpha + (1 - alpha) * end[0];
+      c[1] = start[1] * alpha + (1 - alpha) * end[1];
+      c[2] = start[2] * alpha + (1 - alpha) * end[2];
+
+      saida.push(convertToHex(c));
+    }
+
+    return saida;
+  }
+} /////////////////////////end of code by Euler Junior on Stackoverflow
 
 function hoverOff(event) {
   if (event.target.classList.contains("cell")) {
