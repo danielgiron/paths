@@ -17,11 +17,11 @@ body {
   position: relative;
   display: inline-block;
   border: 0px solid gray;
-  background-color: rgb(255, 255, 255);
+  background-color: #ffffff;
   width: 7px;
   height: 7px;
   box-sizing: border-box;
-  margin: 1px;
+  margin: 0px;
 }
 
 .highlight {

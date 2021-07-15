@@ -1,11 +1,14 @@
 let cellsContainer = document.querySelector(".cells__container");
 
-for (let y = 0; y < 80; y++) {
-  for (let x = 0; x < 80; x++) {
+const GRID_SIZE = 60; //maximum suggested size is 80
+
+for (let y = 0; y < GRID_SIZE; y++) {
+  for (let x = 0; x < GRID_SIZE; x++) {
     let newBlock = document.createElement("div");
     newBlock.classList.add("cell");
     cellId = "x" + x + "y" + y;
     newBlock.id = cellId;
+    newBlock.style.backgroundColor = "rgb(255, 255, 255)";
     cellsContainer.appendChild(newBlock);
   }
   const br = document.createElement("br");
@@ -15,23 +18,12 @@ for (let y = 0; y < 80; y++) {
 cellsContainer.addEventListener("mouseover", hoverOn);
 //cellsContainer.addEventListener("mouseout", hoverOff);
 
-// for (let i = 0; i < 10; i++) {
-//   let style = getComputedStyle(cell);
-//   //let newColor = adjust(style.backgroundColor, 50);
-//   //console.log(style.backgroundColor, newColor);
-//   intermediaryTimeout(i);
-
-//   // setTimeout((i) => {
-//   //   //cell.style.backgroundColor = newColor;
-//   //   console.log(i);
-//   // }, 2000);
-// }
-
 let highlightColor = "#2d314e";
-let colorStops = 2;
+let colorStops = 3;
 let colorArray = generateColor("#ffffff", highlightColor, colorStops);
 const FADE = true;
 
+//draws trail on grid, controlling length, color, duration.
 function hoverOn(event) {
   if (event.target.classList.contains("cell")) {
     let cell = event.target;
@@ -50,7 +42,7 @@ function hoverOn(event) {
           } else {
             //cell.classList.remove("highlight");
           }
-        }, 500);
+        }, 200);
       }
 
       loop();
@@ -58,44 +50,84 @@ function hoverOn(event) {
   }
 }
 
+//function controlling red dot on screen
 function movingDot() {
-  let startingX = 39;
-  let startingY = 39;
-  let redCell = document.getElementById("x" + startingX + "y" + startingY);
+  let xPosition = GRID_SIZE / 2;
+  let yPosition = GRID_SIZE / 2;
+  let redCell = document.getElementById("x" + xPosition + "y" + yPosition);
   redCell.style.backgroundColor = "red";
 
   let direction = Math.floor(Math.random() * 5);
-  let c = 0;
 
-  function redLoop() {
-    setTimeout(function (direction) {
-      direction = Math.floor(Math.random() * 5);
-      redCell.style.backgroundColor = "#ffffff";
-      if (direction === 0) {
-        startingX++;
-      }
-      if (direction === 1) {
-        startingY++;
-      }
-      if (direction === 2) {
-        startingX--;
-      }
-      if (direction === 3) {
-        startingY--;
-      }
+  //self-referencing function that updates direction and speed of red dot
+  function redDotLoop() {
+    setTimeout(function () {
+      //checking surrounding cells
+      let cellRight = document.getElementById(
+        "x" + (xPosition + 1) + "y" + yPosition
+      );
+      //cellRight.style.backgroundColor = "limegreen";
 
-      redCell = document.getElementById("x" + startingX + "y" + startingY);
+      let cellBelow = document.getElementById(
+        "x" + xPosition + "y" + (yPosition + 1)
+      );
+      //cellBelow.style.backgroundColor = "limegreen";
+
+      let cellLeft = document.getElementById(
+        "x" + (xPosition - 1) + "y" + yPosition
+      );
+      //cellLeft.style.backgroundColor = "green";
+
+      let cellAbove = document.getElementById(
+        "x" + xPosition + "y" + (yPosition - 1)
+      );
+
+      movement();
+
+      redCell.style.backgroundColor = "rgb(255, 255, 255)";
+      redCell = document.getElementById("x" + xPosition + "y" + yPosition);
       redCell.style.backgroundColor = "red";
-      c++;
 
-      if (startingX > 0 && startingX < 79 && startingY > 0 && startingY < 79) {
-        redLoop();
+      if (xPosition > 0 && xPosition < 79 && yPosition > 0 && yPosition < 79) {
+        redDotLoop();
       }
-    }, 0);
+
+      function movement() {
+        if (direction === 0) {
+          if (cellRight.style.backgroundColor === "rgb(255, 255, 255)") {
+            xPosition++;
+          } else {
+            direction = Math.floor(Math.random() * 5);
+            movement();
+          }
+        } else if (direction === 1) {
+          if (cellBelow.style.backgroundColor === "rgb(255, 255, 255)") {
+            yPosition++;
+          } else {
+            direction = Math.floor(Math.random() * 5);
+            movement();
+          }
+        } else if (direction === 2) {
+          if (cellLeft.style.backgroundColor === "rgb(255, 255, 255)") {
+            xPosition--;
+          } else {
+            direction = Math.floor(Math.random() * 5);
+            movement();
+          }
+        } //(direction === 3)
+        else {
+          if (cellAbove.style.backgroundColor === "rgb(255, 255, 255)") {
+            yPosition--;
+          } else {
+            direction = Math.floor(Math.random() * 5);
+            movement();
+          }
+        }
+      }
+    }, 100); //ms of setTimeout controlling speed of red dot
   }
 
-  redLoop();
-  console.log(c);
+  redDotLoop();
 }
 
 movingDot();
