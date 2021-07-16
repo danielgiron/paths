@@ -1,6 +1,46 @@
-let cellsContainer = document.querySelector(".cells__container");
+const GRID_SIZE = 70; //maximum suggested size is 80
+const TRAIL_FADE = true;
+let SHADE_AVERAGING = false;
+let RED_DOT = false;
 
-const GRID_SIZE = 60; //maximum suggested size is 80
+let highlightColor = "#2d314e";
+let colorStops = 3;
+let colorArray = generateColor("#ffffff", highlightColor, colorStops);
+let colorGradient = generateColor("#ffffff", highlightColor, 10);
+
+let cellsContainer = document.querySelector(".cells__container");
+cellsContainer.addEventListener("mouseover", hoverOn);
+//cellsContainer.addEventListener("mouseout", hoverOff);
+let averagingBtn = document.getElementById("averaging_btn");
+let redDotBtn = document.getElementById("redDot_btn");
+averagingBtn.addEventListener("click", toggleAveraging);
+redDotBtn.addEventListener("click", toggleRedDot);
+
+function toggleAveraging(event) {
+  let e = event.target;
+  e.classList.toggle("active");
+  if (e.classList.contains("active")) {
+    SHADE_AVERAGING = true;
+    console.log("SHADING ON");
+  } else {
+    SHADE_AVERAGING = false;
+    console.log("SHADING OFF");
+  }
+  console.log(e);
+  checkStates();
+}
+
+function toggleRedDot(event) {
+  let e = event.target;
+  e.classList.toggle("active");
+  if (e.classList.contains("active")) {
+    RED_DOT = true;
+  } else {
+    RED_DOT = false;
+  }
+  //console.log(e);
+  checkStates();
+}
 
 for (let y = 0; y < GRID_SIZE; y++) {
   for (let x = 0; x < GRID_SIZE; x++) {
@@ -9,38 +49,87 @@ for (let y = 0; y < GRID_SIZE; y++) {
     cellId = "x" + x + "y" + y;
     newBlock.id = cellId;
     newBlock.style.backgroundColor = "rgb(255, 255, 255)";
+    newBlock.shade = 0;
     cellsContainer.appendChild(newBlock);
   }
   const br = document.createElement("br");
   cellsContainer.appendChild(br);
 }
 
-cellsContainer.addEventListener("mouseover", hoverOn);
-//cellsContainer.addEventListener("mouseout", hoverOff);
+function checkStates() {
+  averaging();
+  movingDot();
+}
 
-let highlightColor = "#2d314e";
-let colorStops = 3;
-let colorArray = generateColor("#ffffff", highlightColor, colorStops);
-const FADE = true;
+//console.log(colorArray) => ["737589", "b9bac4", "ffffff"]
+function averaging() {
+  if (SHADE_AVERAGING) {
+    setInterval(() => {
+      for (let y = 0; y < GRID_SIZE; y++) {
+        for (let x = 0; x < GRID_SIZE; x++) {
+          //console.log();
+          let cell = document.getElementById("x" + x + "y" + y);
+          let average = 0;
+          let total = 0;
+          let neighbors = 0;
+
+          try {
+            let cellRight = document.getElementById("x" + (x + 1) + "y" + y);
+            total = total + cellRight.shade;
+            neighbors = neighbors + 1;
+          } catch {}
+          try {
+            let cellBelow = document.getElementById("x" + x + "y" + (y + 1));
+            total = total + cellBelow.shade;
+            neighbors = neighbors + 1;
+          } catch {}
+          try {
+            let cellLeft = document.getElementById("x" + (x - 1) + "y" + y);
+            total = total + cellLeft.shade;
+            neighbors = neighbors + 1;
+          } catch {}
+          try {
+            let cellAbove = document.getElementById("x" + x + "y" + (y - 1));
+            total = total + cellAbove.shade;
+            neighbors = neighbors + 1;
+          } catch {}
+
+          average = Math.floor(total / neighbors);
+          let result = 10 - average;
+          cell.style.backgroundColor = "#" + colorGradient[result];
+          //console.log(cell.style.backgroundColor);
+        }
+      }
+    }, 50);
+  }
+}
 
 //draws trail on grid, controlling length, color, duration.
 function hoverOn(event) {
   if (event.target.classList.contains("cell")) {
     let cell = event.target;
-    //cell.classList.add("highlight");
     cell.style.backgroundColor = highlightColor;
     console.log(cell.id);
 
-    if (FADE) {
+    if (TRAIL_FADE) {
       let i = 0;
       function loop() {
         setTimeout(function () {
           cell.style.backgroundColor = "#" + colorArray[i];
+          switch (i) {
+            case 2:
+              cell.shade = 0;
+              break;
+            case 1:
+              cell.shade = 4;
+              break;
+            case 0:
+              cell.shade = 9;
+              break;
+          }
           i++;
           if (i < colorStops) {
             loop();
-          } else {
-            //cell.classList.remove("highlight");
           }
         }, 200);
       }
@@ -52,82 +141,90 @@ function hoverOn(event) {
 
 //function controlling red dot on screen
 function movingDot() {
-  let xPosition = GRID_SIZE / 2;
-  let yPosition = GRID_SIZE / 2;
-  let redCell = document.getElementById("x" + xPosition + "y" + yPosition);
-  redCell.style.backgroundColor = "red";
+  if (RED_DOT) {
+    let xPosition = GRID_SIZE / 2;
+    let yPosition = GRID_SIZE / 2;
+    let redCell = document.getElementById("x" + xPosition + "y" + yPosition);
+    redCell.style.backgroundColor = "red";
 
-  let direction = Math.floor(Math.random() * 5);
+    let direction = Math.floor(Math.random() * 5);
 
-  //self-referencing function that updates direction and speed of red dot
-  function redDotLoop() {
-    setTimeout(function () {
-      //checking surrounding cells
-      let cellRight = document.getElementById(
-        "x" + (xPosition + 1) + "y" + yPosition
-      );
-      //cellRight.style.backgroundColor = "limegreen";
+    //self-referencing function that updates direction and speed of red dot
+    function redDotLoop() {
+      setTimeout(function () {
+        //checking surrounding cells
+        let cellRight = document.getElementById(
+          "x" + (xPosition + 1) + "y" + yPosition
+        );
+        //cellRight.style.backgroundColor = "limegreen";
 
-      let cellBelow = document.getElementById(
-        "x" + xPosition + "y" + (yPosition + 1)
-      );
-      //cellBelow.style.backgroundColor = "limegreen";
+        let cellBelow = document.getElementById(
+          "x" + xPosition + "y" + (yPosition + 1)
+        );
+        //cellBelow.style.backgroundColor = "limegreen";
 
-      let cellLeft = document.getElementById(
-        "x" + (xPosition - 1) + "y" + yPosition
-      );
-      //cellLeft.style.backgroundColor = "green";
+        let cellLeft = document.getElementById(
+          "x" + (xPosition - 1) + "y" + yPosition
+        );
+        //cellLeft.style.backgroundColor = "green";
 
-      let cellAbove = document.getElementById(
-        "x" + xPosition + "y" + (yPosition - 1)
-      );
+        let cellAbove = document.getElementById(
+          "x" + xPosition + "y" + (yPosition - 1)
+        );
 
-      movement();
+        movement();
 
-      redCell.style.backgroundColor = "rgb(255, 255, 255)";
-      redCell = document.getElementById("x" + xPosition + "y" + yPosition);
-      redCell.style.backgroundColor = "red";
+        redCell.style.backgroundColor = "rgb(255, 255, 255)";
+        redCell = document.getElementById("x" + xPosition + "y" + yPosition);
+        redCell.style.backgroundColor = "red";
 
-      if (xPosition > 0 && xPosition < 79 && yPosition > 0 && yPosition < 79) {
-        redDotLoop();
-      }
+        if (
+          xPosition > 0 &&
+          xPosition < 79 &&
+          yPosition > 0 &&
+          yPosition < 79
+        ) {
+          redDotLoop();
+        }
 
-      function movement() {
-        if (direction === 0) {
-          if (cellRight.style.backgroundColor === "rgb(255, 255, 255)") {
-            xPosition++;
-          } else {
-            direction = Math.floor(Math.random() * 5);
-            movement();
-          }
-        } else if (direction === 1) {
-          if (cellBelow.style.backgroundColor === "rgb(255, 255, 255)") {
-            yPosition++;
-          } else {
-            direction = Math.floor(Math.random() * 5);
-            movement();
-          }
-        } else if (direction === 2) {
-          if (cellLeft.style.backgroundColor === "rgb(255, 255, 255)") {
-            xPosition--;
-          } else {
-            direction = Math.floor(Math.random() * 5);
-            movement();
-          }
-        } //(direction === 3)
-        else {
-          if (cellAbove.style.backgroundColor === "rgb(255, 255, 255)") {
-            yPosition--;
-          } else {
-            direction = Math.floor(Math.random() * 5);
-            movement();
+        function movement() {
+          if (direction === 0) {
+            if (cellRight.style.backgroundColor === "rgb(255, 255, 255)") {
+              xPosition++;
+            } else {
+              direction = Math.floor(Math.random() * 5);
+              movement();
+            }
+          } else if (direction === 1) {
+            if (cellBelow.style.backgroundColor === "rgb(255, 255, 255)") {
+              yPosition++;
+            } else {
+              direction = Math.floor(Math.random() * 5);
+              movement();
+            }
+          } else if (direction === 2) {
+            if (cellLeft.style.backgroundColor === "rgb(255, 255, 255)") {
+              xPosition--;
+            } else {
+              direction = Math.floor(Math.random() * 5);
+              movement();
+            }
+          } //(direction === 3)
+          else {
+            if (cellAbove.style.backgroundColor === "rgb(255, 255, 255)") {
+              yPosition--;
+            } else {
+              direction = Math.floor(Math.random() * 5);
+              movement();
+            }
           }
         }
-      }
-    }, 100); //ms of setTimeout controlling speed of red dot
-  }
+      }, 100); //ms of setTimeout controlling speed of red dot
+    }
 
-  redDotLoop();
+    redDotLoop();
+  }
+  RED_DOT = false; //end of function, no longer active
 }
 
 movingDot();
