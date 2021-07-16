@@ -224,6 +224,8 @@ function movingDot() {
 
     redDotLoop();
   }
+
+  //else {}
   RED_DOT = false; //end of function, no longer active
 }
 
